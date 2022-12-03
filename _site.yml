@@ -5,10 +5,6 @@ navbar:
   left:
     - text: "Home"
       href: index.html
-    - text: "TCGA Database"
-      href: index.html
-    - text: "Extra Resources"
-      href: index.html
       
   right:
     - icon: fa-github fa-lg

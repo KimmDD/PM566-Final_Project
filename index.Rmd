@@ -11,18 +11,8 @@ output:
         css: style.css
 ---
 
-```{r setup, message=FALSE, echo=FALSE, warning=FALSE}
-library(TCGAbiolinks)
-library(tidyverse)
-library(plotly)
-library(survival)
-library(survminer)
-library(ggplot2)
-library(ggpubr)
-library(knitr)
-```
-
 ```{r message=FALSE, echo=FALSE, warning=FALSE}
+library(knitr)
 # Initialize code chunk options
 opts_chunk$set(
   warning = FALSE,
@@ -49,7 +39,7 @@ opts_chunk$set(
 
 <h2><strong> Introduction </strong> </h2> 
 
-<p> Breast cancer becomes the second leading cause of cancer death in women, so it is necessary for us to analyze the data of breast cancer patients and to discover the pathway and mechanism of breast cancer-related genes due to the high prevalence and mortality rate. In this project, since breast cancer can occur in women but rarely in men, I mainly focus on the age factor in female patients </p>
+<p> Breast cancer becomes the second leading cause of cancer death in women, so it is necessary for us to analyze the data of breast cancer patients and to discover the pathway and mechanism of breast cancer-related genes due to the high prevalence and mortality rate. In this project, I want to examine how the age influences the female patients outcome when developing breast cancer by looking at several factors.  </p>
 
 
 <h2><strong> Database </strong> </h2> 
@@ -64,131 +54,83 @@ knitr::include_graphics("tcga.jpeg")
 
 
 ```{r load-data, message=FALSE, echo=FALSE, warning=FALSE, include=FALSE}
-source("analysis.R")
+source("R_analysis.R")
 ```
+
+<h2><strong> Distribution Analysis </strong> </h2> 
+
+<p> The first factor I looked at is pathologic stage, and I examine the distribution of each pathologic stage in each different age category.The pathologic stage is very important since it helps us define the condition of cancer in patients' body </p>
+
+<hr>
+
+```{r plot_01, message=FALSE, echo=FALSE, warning=FALSE}
+distribution_graph = ggplot(clinic_age_no_NAs, aes(age_category, after_stat(count))) + geom_bar(aes(fill =ajcc_pathologic_stage ), position = "dodge") + scale_fill_viridis_d() + labs(title="Distribution of pathologic stages in each age category", x = "age category", y= "count") + mynamestheme
+
+ggplotly(distribution_graph)
+```
+
+<p> I find that in each category, most female patients are in stage IIA or stage IIB, whereas stage II and stage III have the least number of people. Stage 2 means the breast cancer is growing, but it is still contained in the breast or growth has only extended to the nearby lymph nodes. This stage is divided into groups: Stage 2A and Stage 2B. The difference is determined by the size of the tumor and whether the breast cancer has spread to the lymph nodes. Stage 3 means that the cancer has spread from the breast to lymph nodes close to the breast or to the skin of the breast or to the chest wall </p> 
+
+<p> Then I want to examine the relationship between count of lymph node and age in female patients' vital status. Lymph node is another important markers to examine the breast cancer. If breast cancer spreads, it typically goes first to nearby lymph nodes under the arm. Therefore, we want to see how the count of lymph node affects female patients' vital status in different ages </p>  
+<hr>
+
+```{r plot_02, message=FALSE, echo=FALSE, warning=FALSE}
+lymph_node_no_NAs %>% 
+  plot_ly(x = ~age_at_initial_pathologic_diagnosis, y = ~lymph_node_examined_count, 
+          type = 'scatter',
+          mode = 'markers',
+          color = ~vital_status,
+          sizes = c(5, 70),
+          marker = list(sizemode='diameter', opacity=0.5), hoverinfo = 'text',
+          text = ~paste( 
+                         paste("Age: ",age_at_initial_pathologic_diagnosis , sep="") ,
+                         paste("Lymph Node Count: ", lymph_node_examined_count, sep=""),
+                         paste("Vital Status: ", vital_status,sep=""),
+                         sep = "<br>")) %>%
+  layout(title = "Ages, Lymph Node Count for Female Breast Cancer Patients",
+         xaxis = list(title = "age at diagnosis"), 
+         yaxis = list(title = "lymph node count"),
+         hovermode = "compare")
+```
+<p> Here we find that there is no significant relationship to see the correlation between age and the number of lymph node. In addition, it is hard to tell that with the increasing number of lymph node, how the vital status changes in female patients. There are still some limitations of this data analysis, including small sample size, sample bias, etc. </p>
 
 <h2><strong> Survival Analysis </strong> </h2> 
 
-<p> I first did survival analysis in female patients and examined the survival difference between young and old patients on two conditions: with tumor and without tumor </p>
-```{r plot_01, message=FALSE, echo=FALSE, warning=FALSE}
+<p> In many cancer studies, the main outcome under assessment is the time to an event of interest. If the event occurred in all individuals, many methods of analysis would be applicable. However, it is usual that at the end of follow-up some of the individuals have not had the event of interest, and thus their true time to event is unknown. Further, survival data are rarely Normally distributed, but are skewed and comprise typically of many early events and relatively few late ones. It is these features of the data that make the special methods called survival analysis necessary </p>
+
+<p> Therefore, I did survival analysis in female patients and examined the survival difference between young and old patients on two conditions: with tumor and without tumor </p>
+
+<hr>
+
+
+### With Tumor
+
+```{r plot_03, message=FALSE, echo=FALSE, warning=FALSE}
 #the ggtheme and legend arguments are for formatting. 
 # Feel free to play around with the margins and legend placement
 survplot_with_tumor = ggsurvplot(age_fit_with_tumor, 
-                      risk.table=TRUE, 
-                      risk.table.col="strata",
-                      risk.table.title = FALSE,
-                      legend = "right",
-                      legend.title = c("Age"),
-                      legend.labs = c("old (N=61)", "young (N=38)"),
-                      title="Kaplan-Meier Curve for Breast Cancer Survival with tumor (N=99)",
-                      risk.table.height=0.3,
-                      ggtheme = theme_bw())
+                                 legend = "right",
+                                 legend.title = c("Age"),
+                                 legend.labs = c("old (N=61)", "young (N=38)"),
+                                 title="Kaplan-Meier Curve for Breast Cancer Survival with tumor (N=99)",
+                                 ggtheme = theme_bw()) 
 
-survival_obj_with_tumor <- plotly::ggplotly(survplot_with_tumor[[1]])
-
-risk_obj_with_tumor <- plotly::ggplotly(survplot_with_tumor[[2]])
-
-final_plotly_obj_with_tumor <- plotly::subplot(survival_obj_with_tumor, risk_obj_with_tumor , nrows = 2, shareX = TRUE, titleY = TRUE, heights=c(0.8, 0.2), margin = 0.07) %>%
-  layout(title = 'Survival Analysis for Breast Cancer with tumor (N=99)')
- 
+plotly::ggplotly(survplot_with_tumor[[1]])
 ```
 
-```{r plot_02, message=FALSE, echo=FALSE, warning=FALSE}
+### Without Tumor
+
+```{r plot_04, message=FALSE, echo=FALSE, warning=FALSE}
 survplot_tumor_free = ggsurvplot(age_fit_tumor_free, 
-                                 risk.table=TRUE, 
-                                 risk.table.col="strata", 
                                  legend = "right",
                                  legend.title = c("Age"),
                                  legend.labs = c("old (N=690)", "young (N=237)"),
-                                 title="Survival Analysis for Breast Cancer without tumor (N=928)",
-                                 risk.table.height=0.3,
-                                 ggtheme = theme_bw())
+                                 title="Kaplan-Meier Curve for Breast Cancer Survival without tumor (N=928)",
+                                 ggtheme = theme_bw()) 
 
-survival_obj_tumor_free <- plotly::ggplotly(survplot_tumor_free[[1]])
-
-risk_obj_tumor_free <- plotly::ggplotly(survplot_tumor_free[[2]])
-
-final_plotly_obj_tumor_free <- plotly::subplot(survival_obj_tumor_free, risk_obj_tumor_free , nrows = 2, shareX = TRUE, titleY = TRUE, heights=c(0.8, 0.2), margin = 0.07) %>%
-  layout(title = 'Survival Analysis for Breast Cancer without tumor (N=928)')
-
+plotly::ggplotly(survplot_tumor_free[[1]])
 ```
 
-## {.tabset}
-
-### Tab 1
-
-```{r echo=FALSE}
-final_plotly_obj_with_tumor
-```
-
-### Tab 2
-
-```{r echo=FALSE}
-final_plotly_obj_tumor_free
-```
-
-## {-}
 
 <p> We can find that overall, female patients without tumor have higher survival probability than female patients with tumor. If we examine closer, we can see that there is no significant survival difference between young and old patients when they have tumor. However, in the tumor-free group, old patients experience much lower survival probability than young patients </p> 
 
-<h2><strong> Gene Mutation Analysis </strong> </h2> 
-
-<p> This is the oncoplot graph shows the difference in gene's mutation rate between young and old patients </p>
-
-```{r plot_03, message=FALSE, echo=FALSE, warning=FALSE, include=FALSE}
-# The gene we choose is TP53 acts as a tumor suppressor
-clinic_maf = maf_object@clinical.data
-# Create the young_patients_ids vector
-young_patients_ids = clinic_maf$Tumor_Sample_Barcode[clinic_maf$age_at_initial_pathologic_diagnosis < 50]
-
-young_maf = subsetMaf(maf = maf_object,
-                      tsb = young_patients_ids)
-
-# 4. Repeat steps 2-3 to create an old_maf! Can you do it in one line?
-old_patients_ids = clinic_maf$Tumor_Sample_Barcode[clinic_maf$age_at_initial_pathologic_diagnosis >= 50]
-old_maf = subsetMaf(maf = maf_object,
-                    tsb = old_patients_ids)
-```
-
-```{r message=FALSE, echo=FALSE}
-coOncoplot(m1 = young_maf, 
-           m2 = old_maf, 
-           m1Name = "young", 
-           m2Name = "old")
-```
-
-<p> Here, we close look at two genes: TP53 and GATA3, and see their mutation spots on protein structure. TP53 is the tumor suppressor and GATA3 is a regulator of mammary luminal cell differentiation, and an estrogen receptor (ER) associated marker in breast cancer </p>
-
-<p> We use Lollipop plots to draw the mutation rate. Lollipop plots are simple and most effective way showing mutation spots on protein structure. Many oncogenes have a preferential sites which are mutated more often than any other locus. These spots are considered to be mutational hot-spots and lollipop plots can be used to display them along with rest of the mutations </p>
-
-## {.tabset}
-
-### Tab 1
-
-```{r plot_04, message=FALSE, echo=FALSE, warning=FALSE,comment=FALSE}
-lollipopPlot2(m1 = young_maf, 
-              m2 = old_maf, 
-              m1_name= "young_patients",
-              m2_name = "old_patients",
-              gene = "TP53")
-```
-
-### Tab 2
-
-```{r plot_05, message=FALSE, echo=FALSE, warning=FALSE, comment=FALSE}
-lollipopPlot2(m1 = young_maf, 
-              m2 = old_maf, 
-              m1_name= "young_patients",
-              m2_name = "old_patients",
-              gene = "GATA3")
-```
-
-## {-}
-
-<p> We find that the mutation spots for TP53 spread across the whole protein, and the mutation varies. However, the mutation spots for GATA3 concentrate on one side of the protein with more frame_shift_Ins mutation </p>
-
-<h2><strong> Implication </strong> </h2> 
-
-<p> In many cancer studies, the main outcome under assessment is the time to an event of interest. If the event occurred in all individuals, many methods of analysis would be applicable. However, it is usual that at the end of follow-up some of the individuals have not had the event of interest, and thus their true time to event is unknown. Further, survival data are rarely Normally distributed, but are skewed and comprise typically of many early events and relatively few late ones. It is these features of the data that make the special methods called survival analysis necessary </p>
-
-<p> The mutation spots tell us how the mutation locates on the protein, and we could find that for each gene, the mutation type and the mutation distribution are different. Therefore, the lollipop plots help us to further examine the mechanism of each gene mutation and possibly will find the precise treatment for those genes </p>
