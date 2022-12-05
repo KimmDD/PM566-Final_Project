@@ -89,7 +89,7 @@ distribution_graph_2 = ggplot(clinic_age_no_NAs, aes(ajcc_pathologic_stage, afte
 ggplotly(distribution_graph_2)
 ```
 
-<p> Here, we can see that all female patients in stage IB and stage II are alive, whereas the proportion of female patients whose vital status is dead at stage III, stage IV, and stage X is high. </p> 
+<p> Here, we can see that all female patients in stage IB and stage II are alive, whereas the proportion of female patients whose vital status is dead at stage III, and stage IV is high. </p> 
 
 <hr>
 
@@ -117,7 +117,7 @@ sum_exp_dataframe_age %>%
          yaxis = list(title = "Pathologic Stage"),
          hovermode = "compare")
 ```
-<p> From the graph, it is hard to tell that whether aging affects the female patient's vital status. But for the pathologic stage, especially in stage IV and stage X, the proportion of patients dying is increasing. If we consider the age factor in stage X and stage IV, we can see that the proportion of old patients whose vital status is dead is the highest. </p>
+<p> From the graph, it is hard to tell that whether aging affects the female patient's vital status. But for the pathologic stage, especially in stage IV, the proportion of patients dying is increasing. If we consider the age factor in stage IV, we can see that the proportion of old patients whose vital status is dead is the highest. </p>
   
 
 ## Survival Analysis 
@@ -137,14 +137,14 @@ sum_exp_dataframe_age %>%
  survplot_data_stageII = ggsurvplot(age_fit_data_stageII, 
                                    legend = "right",
                                    legend.title = c("Age"),
-                                   legend.labs = c("old (N=952)", "young (N=350)"),
+                                   legend.labs = c("old (N=544)", "young (N=758)"),
                                    title="Survival Analysis for Female Patients at Stage II (N=1302)",
                                    ggtheme = theme_bw()) 
  
  plotly::ggplotly(survplot_data_stageII[[1]])
 ```
 
-<p> From the Keplain Meier Plot, we see that, in general, there is no significant difference between survival probability beween old female patients and young female patients. But with times goes by, the survial probability of young female patients is slightly higher than that of old patients.</p> 
+<p> From the Keplain Meier Plot, we see that with time goes by, the survival probability of young female patients is higher than that of old female patients.</p> 
 
 <hr>
 
@@ -154,7 +154,7 @@ sum_exp_dataframe_age %>%
 survplot_data_stageIV = ggsurvplot(age_fit_data_stageIV, 
                                      legend = "right",
                                      legend.title = c("Age"),
-                                     legend.labs = c("old (N=32)", "young (N=8)"),
+                                     legend.labs = c("old (N=22)", "young (N=18)"),
                                      title="Survival Analysis for Female Patients at Stage IV (N=40)",
                                      ggtheme = theme_bw()) 
  
@@ -165,7 +165,7 @@ survplot_data_stageIV = ggsurvplot(age_fit_data_stageIV,
 
 ## Conclusion
 
-<p> First, we examine the structure of our clinic data with three factors: age, pathologic stage, and vital status. In general, the rate of death was higher for female patients in the higher state (for example, in stage IV and stage X). At the same time, for female patients in the same stage, the rate of death was higher for old patients. When we examine the survival probability in each stage, we cannot get a conclusion since the population in each stage is varied. But if we see the survival analysis in stage II and stage III (with the most population), we see that the survival probability of young female patients is slighter higher than that of old female patients in stage II. However, in stage III, we see the opposite side. </p>
+<p> First, we examine the structure of our clinic data with three factors: age, pathologic stage, and vital status. In general, the rate of death was higher for female patients in the higher state (for example, in stage IV). At the same time, for female patients in the same stage, the rate of death was higher for old patients. When we examine the survival probability in each stage, we cannot get a general conclusion since the population in each stage is varied. But if we see the survival analysis in stage II and stage III (with the most population), we see that the survival probability of young female patients is higher than that of old female patients. </p>
 
 <p> The research still faces many limitations, including scarce sample size, and more quantitative data to diagnoze different stages, etc. For my future research, I will continue to get more data for female breast cancer patients and construct a more convincing survival analysis. Also, I want to deeply explore the reason to cause the difference in survival probability in different pathologic stage. </p> 
 
