@@ -36,7 +36,7 @@ opts_chunk$set(
 }
 ```
 
-<p></p>
+<p> Read PDF Written Report [here](report/written_report.pdf) </p>
 <p></p>
 
 ## Introduction
@@ -96,7 +96,7 @@ ggplotly(distribution_graph_2)
 <p> Then I want to combine age, pathologic stage, and vital status together, to see the relationship between pathologic stage and age in female patients' vital status. </p>  
 <hr>
 
-### Age Category vs. Pathologic Stage vs. Vital Status
+### Age vs. Pathologic Stage vs. Vital Status
 
 ```{r plot_03, message=FALSE, echo=FALSE, warning=FALSE}
 # examine the relationship between age, pathologic_stage based on vital_status

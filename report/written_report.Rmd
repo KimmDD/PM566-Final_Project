@@ -26,6 +26,17 @@ library(ggpubr)
 library(dplyr)
 ```
 
+```{r message=FALSE, echo=FALSE, warning=FALSE}
+# create theme for plots
+mynamestheme <- theme(
+  plot.title = element_text(family = "Helvetica", face = "bold", size = (15)),
+  legend.title = element_text(colour = "steelblue", face = "bold.italic", family = "Helvetica"),
+  legend.text = element_text(face = "italic", colour = "steelblue4", family = "Helvetica"),
+  axis.title = element_text(family = "Helvetica", size = (10), colour = "steelblue4"),
+  axis.text = element_text(family = "Courier", colour = "cornflowerblue", size = (10))
+)
+```
+
 ## Introduction
 
 <p> Except for skin cancers, breast cancer is the most prevalent cancer in women in the US. 30% (or 1 in 3) of all new cases of female cancer each year are caused by it. Women in their middle years and older tend to develop breast cancer. At the time of breast cancer diagnosis, the average age is 62. As a result, 62 years of age or younger is the average age at which breast cancer in women is discovered. Women under 45 who have been diagnosed with breast cancer are extremely rare. In general, a woman's lifetime chance of acquiring breast cancer in the United States is around 13%. Because of the high prevalence and mortality rate of lung cancer, it is essential to discover the pathway and mechanism of breast cancer in female patients. The development of breast cancer is divided into several stages: stage I, stage II, stage III, stage IV, and stage X. 
@@ -85,10 +96,176 @@ create bar plot, and plotly was used to create interactive plots. </p>
 
 ## Results
 
-<p> The bar plot in Figure 1 depicts the distribution of pathologic stage beween old female patients and young female patients. 
+<p> The bar plot in Figure 1 depicts the distribution of pathologic stage bewteen old female patients and young female patients. In each category, most female patients are in stage IIA or stage IIB, whereas stage II and stage III have the least number of people. </p> 
 
+```{r plot_01, message=FALSE, echo=FALSE, warning=FALSE}
+distribution_graph = ggplot(clinic_age_no_NAs, aes(age_category, after_stat(count))) + geom_bar(aes(fill =ajcc_pathologic_stage ), position = "dodge") + scale_fill_viridis_d() + labs(title="Distribution of pathologic stages in each age category", x = "age category", y= "count") + mynamestheme
 
+distribution_graph
+```
 
+<p> Figure 1. Bar plot for the distribution of pathologic stage bewteen old female patients and young female patients. There are 88 young female patients and 106 old female patients in stage I. There are 90 young female patients and 96 old female patients in stage IA. There are 8 young female patients and 8 old female patients in stage IB. There are 2 young female patients and 8 old female patients in stage II. There are 350 young female patients and 416 old female patients in stage IIA. There are 192 young female patients and 334 old female patients in stage IIB. There are 2 young female patients and 2 old female patients in stage III. There are 130 young female patients and 204 old female patients in stage IIIA. There are 30 young female patients and 24 old female patients in stage IIIB. There are 54 young female patients and 84 old female patients in stage IIIC. There are 22 young female patients and 18 old female patients in stage IV. </p>
+
+<br>
+<p> Then, the distribution of vital status in each pathologic stage is examined. From Figure 2, all female patients in stage IB and stage II are alive, whereas the proportion of female patients whose vital status is dead at stage III, and stage IV is high. </p> 
+
+```{r plot_02, message=FALSE, echo=FALSE, warning=FALSE}
+# create graph to see the distribution of vital status in each stage
+distribution_graph_2 = ggplot(clinic_age_no_NAs, aes(ajcc_pathologic_stage, after_stat(count), fill = vital_status)) + geom_bar(position="fill", stat="count") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5,hjust = 0.5)) + labs(title="Distribution of vital status in each pathologic stage", x = "pathologic stage", y= "percentage") + mynamestheme
+
+distribution_graph_2
+```
+<p> Figure 2. Bar plot for the distribution of vital status in each pathologic stage. The percentage of "alive" female patients is 89% and the percentage of "dead" female patients is 11% at stage I. The percentage of "alive" female patients is 97% and the percentage of "dead" female patients is 3% at stage IA. The percentage of "alive" female patients is 100% for both stage IB and stage II. The percentage of "alive" female patients is 93% and the percentage of "dead" female patients is 7% at stage IIA. The percentage of "alive" female patients is 92% and the percentage of "dead" female patients is 8% at stage IIB. The percentage of "alive" female patients is 50% and the percentage of "dead" female patients is 50% at stage III. The percentage of "alive" female patients is 88% and the percentage of "dead" female patients is 12% at stage IIIA. The percentage of "alive" female patients is 81% and the percentage of "dead" female patients is 19% at stage IIIB. The percentage of "alive" female patients is 93% and the percentage of "dead" female patients is 7% at stage IIIC. The percentage of "alive" female patients is 55% and the percentage of "dead" female patients is 45% at stage IV. </p>
+
+<br>
+
+<p> The scatter plot is draw to show the relationship between age, pathologic stage, and vital status. From figure 3, no relationship between aging and female patient's vital status. But for the pathologic stage, especially in stage IV, the proportion of patients dying is increasing. If putting the age factor in stage IV, the proportion of old patients whose vital status is dead is the highest. </p>
+
+```{r plot_03, message=FALSE, echo=FALSE, warning=FALSE}
+
+# examine the relationship between age, pathologic_stage based on vital_status
+ggplot(data = clinic_age_no_NAs) + 
+  geom_point(mapping = aes(x = age_at_initial_pathologic_diagnosis, y = ajcc_pathologic_stage, color = vital_status)) + labs(title = "Ages, Pathologic Stage, and Vital Status for Female Breast Cancer Patients",
+         xaxis = list(title = "age at diagnosis"), 
+         yaxis = list(title = "Pathologic Stage"))
+```
+
+<p> Figure 3. Scatter plot for ages, pathologic stage, and vital status for female breast cancer patients. The proportion of "dead" female patients increases with stage increases. The old female patients have more patients with "dead" vital status than young female patients. </p>
+
+<br>
+
+```{r message=FALSE, echo=FALSE, warning=FALSE}
+# survival analysis
+sum_exp_dataframe_age<- as.data.frame(clinic_age_no_NAs)
+
+# replace the NA balue in days_to_death to days_to_last_follow_up
+sum_exp_dataframe_age$days_to_death = ifelse(is.na(sum_exp_dataframe_age$days_to_death), 
+                                             sum_exp_dataframe_age$days_to_last_followup, sum_exp_dataframe_age$days_to_death)
+
+# make the days_to_death column numeric 
+sum_exp_dataframe_age$days_to_death = as.numeric(sum_exp_dataframe_age$days_to_death)
+
+# create the death_event column here
+sum_exp_dataframe_age$death_event = ifelse(sum_exp_dataframe_age$vital_status == "Alive", 0, 1)
+```
+
+<p> Kaplain-Meier plot shows that the survival probability of old female patients dramatically decreases when time at 4000 days, but the young female patients' survival probability gradually increases when the time goes by at Stage I (Figure 4). </p> 
+
+```{r message=FALSE, echo=FALSE, warning=FALSE}
+# extract data in stage I 
+data_stageI <- sum_exp_dataframe_age %>%
+  filter( ajcc_pathologic_stage == "Stage I" | ajcc_pathologic_stage == "Stage IA" | ajcc_pathologic_stage == "Stage IB")
+
+# We initialize a 'survival' object first, which contains the data we need.
+ surv_object_data_stageI <- Surv(time = data_stageI$days_to_death, 
+                                event = data_stageI$death_event)
+
+# We then create a fit object to do the gender analysis 
+age_fit_data_stageI <- surv_fit( surv_object_data_stageI ~ data_stageI$age_category, data = data_stageI )
+
+#the ggtheme and legend arguments are for formatting. 
+# Feel free to play around with the margins and legend placement
+ggsurvplot(age_fit_data_stageI,  
+                                  legend = "right",
+                                  legend.title = c("Age"),
+                                  legend.labs = c("old (N=186)", "young (N=210)"),
+                                  title="Survival Analysis for Female Patients at Stage I (N=396)",
+                                  ggtheme = theme_bw()) 
+ 
+```
+
+<p> Figure 4. Kaplan-Meier plot of the survival probability between the 306 old female patients and 90 young female patients over time at Stage I. The data for this graph was taken from the patient’s clinical data in the TCGA dataset. The survival probability was calculated by the vital status of the patients based on the days until death as the time. At time around 4000 days, the survival probability of old female patients dramatically decreases. </p>
+
+<br>
+
+<p> When it comes to stage II and stage III, the survival probability for young female patients is higher than old female patients with time passes. (Figure 5 and 6) </p>
+
+```{r message=FALSE, echo=FALSE, warning=FALSE}
+ # extract data in stage II 
+ data_stageII <- sum_exp_dataframe_age %>%
+   filter( ajcc_pathologic_stage == "Stage II" | ajcc_pathologic_stage == "Stage IIA" | ajcc_pathologic_stage == "Stage IIB")
+ 
+ # We initialize a 'survival' object first, which contains the data we need.
+ surv_object_data_stageII <- Surv(time = data_stageII$days_to_death, 
+                                 event = data_stageII$death_event)
+ 
+ # We then create a fit object to do the gender analysis 
+ age_fit_data_stageII <- surv_fit( surv_object_data_stageII ~ data_stageII$age_category, data = data_stageII )
+ 
+ #the ggtheme and legend arguments are for formatting. 
+ # Feel free to play around with the margins and legend placement
+ggsurvplot(age_fit_data_stageII, 
+                                   legend = "right",
+                                   legend.title = c("Age"),
+                                   legend.labs = c("old (N=544)", "young (N=758)"),
+                                   title="Survival Analysis for Female Patients at Stage II (N=1302)",
+                                   ggtheme = theme_bw()) 
+ 
+
+```
+
+<p> Figure 5. Kaplan-Meier plot of the survival probability between the 952 old female patients and 350 young female patients over time at Stage II. The data for this graph was taken from the patient’s clinical data in the TCGA dataset. The survival probability was calculated by the vital status of the patients based on the days until death as the time. The survival probability for young female patients is higher than old female patients with time passes.  </p>
+
+```{r message=FALSE, echo=FALSE, warning=FALSE}
+# extract data in stage III 
+ data_stageIII <- sum_exp_dataframe_age %>%
+   filter( ajcc_pathologic_stage == "Stage III" | ajcc_pathologic_stage == "Stage IIIA" | ajcc_pathologic_stage == "Stage IIIB" | ajcc_pathologic_stage == "Stage IIIC")
+ 
+ # We initialize a 'survival' object first, which contains the data we need.
+ surv_object_data_stageIII <- Surv(time = data_stageIII$days_to_death, 
+                                  event = data_stageIII$death_event)
+ 
+ # We then create a fit object to do the gender analysis 
+ age_fit_data_stageIII <- surv_fit( surv_object_data_stageIII ~ data_stageIII$age_category, data = data_stageIII )
+ 
+ #the ggtheme and legend arguments are for formatting. 
+ # Feel free to play around with the margins and legend placement
+ggsurvplot(age_fit_data_stageIII, 
+                                    legend = "right",
+                                    legend.title = c("Age"),
+                                    legend.labs = c("old (N=216)", "young (N=314)"),
+                                    title="Survival Analysis for Female Patients at Stage III (N=530)",
+                                    ggtheme = theme_bw()) 
+ 
+ 
+```
+
+<p> Figure 6. Kaplan-Meier plot of the survival probability between the 216 old female patients and 314 young female patients over time at Stage III. The data for this graph was taken from the patient’s clinical data in the TCGA dataset. The survival probability was calculated by the vital status of the patients based on the days until death as the time. The survival probability for young female patients is higher than old female patients with time passes.  </p>
+
+<br>
+<p> Keplain Meier Plot in Figure 7 shows that at stage IV, the survival probability of young patients dramatically decrease around time at 1000 days. In the contrast, the survival probability of old patients dramatically decreases around time goes to 4000 days. </p>
+
+```{r message=FALSE, echo=FALSE, warning=FALSE}
+ # extract data in stage IV 
+ data_stageIV <- sum_exp_dataframe_age %>%
+   filter( ajcc_pathologic_stage == "Stage IV")
+ 
+ # We initialize a 'survival' object first, which contains the data we need.
+ surv_object_data_stageIV <- Surv(time = data_stageIV$days_to_death, 
+                                   event = data_stageIV$death_event)
+ 
+ # We then create a fit object to do the gender analysis 
+ age_fit_data_stageIV <- surv_fit( surv_object_data_stageIV ~ data_stageIV$age_category, data = data_stageIV )
+ 
+ #the ggtheme and legend arguments are for formatting. 
+ # Feel free to play around with the margins and legend placement
+ ggsurvplot(age_fit_data_stageIV, 
+                                     legend = "right",
+                                     legend.title = c("Age"),
+                                     legend.labs = c("old (N=22)", "young (N=18)"),
+                                     title="Survival Analysis for Female Patients at Stage IV (N=40)",
+                                     ggtheme = theme_bw()) 
+ 
+```
+
+<p> Figure 7. Kaplan-Meier plot of the survival probability between the 32 old female patients and 8 young female patients over time at Stage IV. The data for this graph was taken from the patient’s clinical data in the TCGA dataset. The survival probability was calculated by the vital status of the patients based on the days until death as the time. The survival probability of young patients dramatically decrease around time at 1000 days. </p>
+
+<br>
+
+## Conclusion
+<p> First, we examine the structure of our clinic data with three factors: age, pathologic stage, and vital status. In general, the rate of death was higher for female patients in the higher state (for example, in stage IV). At the same time, for female patients in the same stage, the rate of death was higher for old patients. When we examine the survival probability in each stage, we cannot get a general conclusion since the population in each stage is varied. But if we see the survival analysis in stage II and stage III (with the most population), we see that the survival probability of young female patients is higher than that of old female patients. </p>
+
+<p> The research still faces many limitations, including scarce sample size, and more quantitative data to diagnoze different stages, etc. For my future research, I will continue to get more data for female breast cancer patients and construct a more convincing survival analysis. Also, I want to deeply explore the reason to cause the difference in survival probability in different pathologic stage. </p> 
 
 
 ## Reference

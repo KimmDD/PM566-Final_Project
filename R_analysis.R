@@ -87,7 +87,6 @@ sum_exp_dataframe_age %>%
          yaxis = list(title = "Pathologic Stage"),
          hovermode = "compare") 
 
-
 # extract data in stage I 
 data_stageI <- sum_exp_dataframe_age %>%
   filter( ajcc_pathologic_stage == "Stage I" | ajcc_pathologic_stage == "Stage IA" | ajcc_pathologic_stage == "Stage IB")
