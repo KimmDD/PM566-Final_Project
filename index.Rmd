@@ -1,5 +1,5 @@
 ---
-title: "PM566 Final Project"
+title: "The role of Age, Pathologic Stage, and Vital Status for Female Patients when Developing Breast Cancer"
 author: "Mengdi Chai"
 date: '`r format(Sys.Date())`'
 output: 
@@ -36,17 +36,18 @@ opts_chunk$set(
 }
 ```
 
+<p></p>
+<p></p>
 
-<h2><strong> Introduction </strong> </h2> 
+## Introduction
 
-<p> Breast cancer becomes the second leading cause of cancer death in women, so it is necessary for us to analyze the data of breast cancer patients and to discover the pathway and mechanism of breast cancer-related genes due to the high prevalence and mortality rate. In this project, I want to examine how the age influences the female patients outcome when developing breast cancer by looking at several factors.  </p>
+<p> Breast cancer becomes the second leading cause of cancer death in women, so it is necessary for us to analyze the data of breast cancer patients and to discover the pathway and mechanism of breast cancer-related genes due to the high prevalence and mortality rate. Since breast cancer occurs common in women but rare in men, so in this project I focus on the female patients. Among the factors in the clinic data, I choose age, pathologic stage, and vital status as factors to examine how will they affects the female patients' outcome when they develop breast cancer.  </p>
 
 
-<h2><strong> Database </strong> </h2> 
+## Database  
 
 <p> The Cancer Genome Atlas Program (TCGA) is a cancer genomics program that collects
- over 20,000 cancer tissue samples and matches them with normal samples spanning over 33
- cancer types (National Institute of Health). The data was sourced from TCGA with the TCGAbiolinks library using accession code “BRCA” </p>
+ over 20,000 cancer tissue samples and matches them with normal samples spanning over 33 cancer types (National Institute of Health). The data was sourced from TCGA with the TCGAbiolinks library using accession code “BRCA.” </p>
  
 ```{r message=FALSE, echo=FALSE}
 knitr::include_graphics("tcga.jpeg")
@@ -57,11 +58,13 @@ knitr::include_graphics("tcga.jpeg")
 source("R_analysis.R")
 ```
 
-<h2><strong> Distribution Analysis </strong> </h2> 
+## Basic Statistical Analysis 
 
-<p> The first factor I looked at is pathologic stage, and I examine the distribution of each pathologic stage in each different age category.The pathologic stage is very important since it helps us define the condition of cancer in patients' body </p>
+<p> I first examine the distribution of stages in different age groups. I created a bar plot to see how the pathologic stage distributes between young female patients and old female patients. </p>
 
 <hr>
+
+### Age Category vs. Pathologic Stage 
 
 ```{r plot_01, message=FALSE, echo=FALSE, warning=FALSE}
 distribution_graph = ggplot(clinic_age_no_NAs, aes(age_category, after_stat(count))) + geom_bar(aes(fill =ajcc_pathologic_stage ), position = "dodge") + scale_fill_viridis_d() + labs(title="Distribution of pathologic stages in each age category", x = "age category", y= "count") + mynamestheme
@@ -69,68 +72,100 @@ distribution_graph = ggplot(clinic_age_no_NAs, aes(age_category, after_stat(coun
 ggplotly(distribution_graph)
 ```
 
-<p> I find that in each category, most female patients are in stage IIA or stage IIB, whereas stage II and stage III have the least number of people. Stage 2 means the breast cancer is growing, but it is still contained in the breast or growth has only extended to the nearby lymph nodes. This stage is divided into groups: Stage 2A and Stage 2B. The difference is determined by the size of the tumor and whether the breast cancer has spread to the lymph nodes. Stage 3 means that the cancer has spread from the breast to lymph nodes close to the breast or to the skin of the breast or to the chest wall </p> 
+<p> I find that in each category, most female patients are in stage IIA or stage IIB, whereas stage II and stage III have the least number of people. Stage II means the breast cancer is growing, but it is still contained in the breast or growth has only extended to the nearby lymph nodes. This stage is divided into groups: Stage IIA and Stage IIB. The difference is determined by the size of the tumor and whether the breast cancer has spread to the lymph nodes. Stage III means that the cancer has spread from the breast to lymph nodes close to the breast or to the skin of the breast or to the chest wall. </p> 
 
-<p> Then I want to examine the relationship between count of lymph node and age in female patients' vital status. Lymph node is another important markers to examine the breast cancer. If breast cancer spreads, it typically goes first to nearby lymph nodes under the arm. Therefore, we want to see how the count of lymph node affects female patients' vital status in different ages </p>  
 <hr>
 
+<p> What about the relationship between pathologic stage and vital status? I create the bar graph to see the distribution of vital status of female patients in each pathologic stage. </p> 
+
+<hr>
+
+### Pathologic Stage vs. Vital Status
+
 ```{r plot_02, message=FALSE, echo=FALSE, warning=FALSE}
-lymph_node_no_NAs %>% 
-  plot_ly(x = ~age_at_initial_pathologic_diagnosis, y = ~lymph_node_examined_count, 
+# create graph to see the distribution of vital status in each stage
+distribution_graph_2 = ggplot(clinic_age_no_NAs, aes(ajcc_pathologic_stage, after_stat(count), fill = vital_status)) + geom_bar(position="fill", stat="count") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5,hjust = 0.5)) + labs(title="Distribution of vital status in each pathologic stage", x = "pathologic stage", y= "percentage") + mynamestheme
+
+ggplotly(distribution_graph_2)
+```
+
+<p> Here, we can see that all female patients in stage IB and stage II are alive, whereas the proportion of female patients whose vital status is dead at stage III, stage IV, and stage X is high. </p> 
+
+<hr>
+
+<p> Then I want to combine age, pathologic stage, and vital status together, to see the relationship between pathologic stage and age in female patients' vital status. </p>  
+<hr>
+
+### Age Category vs. Pathologic Stage vs. Vital Status
+
+```{r plot_03, message=FALSE, echo=FALSE, warning=FALSE}
+# examine the relationship between age, pathologic_stage based on vital_status
+sum_exp_dataframe_age %>%
+  plot_ly(x = ~age_at_initial_pathologic_diagnosis, y = ~ajcc_pathologic_stage, 
           type = 'scatter',
           mode = 'markers',
           color = ~vital_status,
           sizes = c(5, 70),
           marker = list(sizemode='diameter', opacity=0.5), hoverinfo = 'text',
           text = ~paste( 
-                         paste("Age: ",age_at_initial_pathologic_diagnosis , sep="") ,
-                         paste("Lymph Node Count: ", lymph_node_examined_count, sep=""),
-                         paste("Vital Status: ", vital_status,sep=""),
-                         sep = "<br>")) %>%
-  layout(title = "Ages, Lymph Node Count for Female Breast Cancer Patients",
+            paste("Age: ",age_at_initial_pathologic_diagnosis , sep="") ,
+            paste("Pathologic Stage: ", ajcc_pathologic_stage, sep=""),
+            paste("Vital Status: ", vital_status,sep=""),
+            sep = "<br>")) %>%
+  layout(title = "Ages, Pathologic Stage, and Vital Status for Female Breast Cancer Patients",
          xaxis = list(title = "age at diagnosis"), 
-         yaxis = list(title = "lymph node count"),
+         yaxis = list(title = "Pathologic Stage"),
          hovermode = "compare")
 ```
-<p> Here we find that there is no significant relationship to see the correlation between age and the number of lymph node. In addition, it is hard to tell that with the increasing number of lymph node, how the vital status changes in female patients. There are still some limitations of this data analysis, including small sample size, sample bias, etc. </p>
+<p> From the graph, it is hard to tell that whether aging affects the female patient's vital status. But for the pathologic stage, especially in stage IV and stage X, the proportion of patients dying is increasing. If we consider the age factor in stage X and stage IV, we can see that the proportion of old patients whose vital status is dead is the highest. </p>
+  
 
-<h2><strong> Survival Analysis </strong> </h2> 
+## Survival Analysis 
 
-<p> In many cancer studies, the main outcome under assessment is the time to an event of interest. If the event occurred in all individuals, many methods of analysis would be applicable. However, it is usual that at the end of follow-up some of the individuals have not had the event of interest, and thus their true time to event is unknown. Further, survival data are rarely Normally distributed, but are skewed and comprise typically of many early events and relatively few late ones. It is these features of the data that make the special methods called survival analysis necessary </p>
+<p> In many cancer studies, the main outcome under assessment is the time to an event of interest. If the event occurred in all individuals, many methods of analysis would be applicable. However, it is usual that at the end of follow-up some of the individuals have not had the event of interest, and thus their true time to event is unknown. Further, survival data are rarely Normally distributed, but are skewed and comprise typically of many early events and relatively few late ones. It is these features of the data that make the special methods called survival analysis necessary. </p>
 
-<p> Therefore, I did survival analysis in female patients and examined the survival difference between young and old patients on two conditions: with tumor and without tumor </p>
+<p> Therefore, I did survival analysis in female patients and examined the survival difference between young and old patients in each pathologic stage. Here, I choose the two most representative stages to explain. </p>
 
 <hr>
 
 
-### With Tumor
-
-```{r plot_03, message=FALSE, echo=FALSE, warning=FALSE}
-#the ggtheme and legend arguments are for formatting. 
-# Feel free to play around with the margins and legend placement
-survplot_with_tumor = ggsurvplot(age_fit_with_tumor, 
-                                 legend = "right",
-                                 legend.title = c("Age"),
-                                 legend.labs = c("old (N=61)", "young (N=38)"),
-                                 title="Kaplan-Meier Curve for Breast Cancer Survival with tumor (N=99)",
-                                 ggtheme = theme_bw()) 
-
-plotly::ggplotly(survplot_with_tumor[[1]])
-```
-
-### Without Tumor
+### At Stage II 
 
 ```{r plot_04, message=FALSE, echo=FALSE, warning=FALSE}
-survplot_tumor_free = ggsurvplot(age_fit_tumor_free, 
-                                 legend = "right",
-                                 legend.title = c("Age"),
-                                 legend.labs = c("old (N=690)", "young (N=237)"),
-                                 title="Kaplan-Meier Curve for Breast Cancer Survival without tumor (N=928)",
-                                 ggtheme = theme_bw()) 
-
-plotly::ggplotly(survplot_tumor_free[[1]])
+ #the ggtheme and legend arguments are for formatting. 
+ # Feel free to play around with the margins and legend placement
+ survplot_data_stageII = ggsurvplot(age_fit_data_stageII, 
+                                   legend = "right",
+                                   legend.title = c("Age"),
+                                   legend.labs = c("old (N=952)", "young (N=350)"),
+                                   title="Survival Analysis for Female Patients at Stage II (N=1302)",
+                                   ggtheme = theme_bw()) 
+ 
+ plotly::ggplotly(survplot_data_stageII[[1]])
 ```
 
+<p> From the Keplain Meier Plot, we see that, in general, there is no significant difference between survival probability beween old female patients and young female patients. But with times goes by, the survial probability of young female patients is slightly higher than that of old patients.</p> 
 
-<p> We can find that overall, female patients without tumor have higher survival probability than female patients with tumor. If we examine closer, we can see that there is no significant survival difference between young and old patients when they have tumor. However, in the tumor-free group, old patients experience much lower survival probability than young patients </p> 
+<hr>
+
+### At Stage IV
+
+```{r plot_05, message=FALSE, echo=FALSE, warning=FALSE}
+survplot_data_stageIV = ggsurvplot(age_fit_data_stageIV, 
+                                     legend = "right",
+                                     legend.title = c("Age"),
+                                     legend.labs = c("old (N=32)", "young (N=8)"),
+                                     title="Survival Analysis for Female Patients at Stage IV (N=40)",
+                                     ggtheme = theme_bw()) 
+ 
+ plotly::ggplotly(survplot_data_stageIV[[1]])
+```
+
+<p> From the Keplain Meier Plot, we see that the survival probability of young patients dramatically decrease around time at 1000 days. In the contrast, the survival probability of old patients dramatically decreases around time goes to 4000 days. The biggest reason causing this is due to the small sample size. So the plot becomes random distribution and less likely to get the result. </p> 
+
+## Conclusion
+
+<p> First, we examine the structure of our clinic data with three factors: age, pathologic stage, and vital status. In general, the rate of death was higher for female patients in the higher state (for example, in stage IV and stage X). At the same time, for female patients in the same stage, the rate of death was higher for old patients. When we examine the survival probability in each stage, we cannot get a conclusion since the population in each stage is varied. But if we see the survival analysis in stage II and stage III (with the most population), we see that the survival probability of young female patients is slighter higher than that of old female patients in stage II. However, in stage III, we see the opposite side. </p>
+
+<p> The research still faces many limitations, including scarce sample size, and more quantitative data to diagnoze different stages, etc. For my future research, I will continue to get more data for female breast cancer patients and construct a more convincing survival analysis. Also, I want to deeply explore the reason to cause the difference in survival probability in different pathologic stage. </p> 
 
