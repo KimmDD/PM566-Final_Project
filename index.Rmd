@@ -1,14 +1,17 @@
 ---
-title: "The role of Age, Pathologic Stage, and Vital Status for Female Patients when Developing Breast Cancer"
+title: The role of Age, Pathologic Stage, and Vital Status for Female Patients when
+  Developing Breast Cancer
 author: "Mengdi Chai"
-date: '`r format(Sys.Date())`'
-output: 
-    html_document:
-        theme: flatly
-        highlight: tango
-        toc: true
-        toc_float: true
-        css: style.css
+date: "`r format(Sys.Date())`"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    theme: flatly
+    highlight: tango
+    toc: yes
+    toc_float: yes
+    css: style.css
 ---
 
 ```{r message=FALSE, echo=FALSE, warning=FALSE}
@@ -36,7 +39,7 @@ opts_chunk$set(
 }
 ```
 
-<p> Read PDF Written Report [here](report/written_report.pdf) </p>
+<p> Read PDF Written Report [here](report/written_report.pdf) or [download](https://github.com/KimmDD/PM566-Final_Project/raw/main/report/written_report.pdf) </p>
 <p></p>
 
 ## Introduction

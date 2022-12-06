@@ -3,7 +3,7 @@
 This is my PM566 final Project, and the tile of the project is: 
 The role of Age, Pathologic Stage, and Vital Status for Female Patients when Developing Breast Cancer
 
-Here is my website: https://kimmdd.github.io/PM566-Final_Project/
+Here is my website: https://kimmdd.github.io/PM566-Final_Project/ 
 
 Breast cancer becomes the second leading cause of cancer death in women, so it is necessary for us to analyze the data of breast cancer patients and to discover the pathway and mechanism of breast cancer-related genes due to the high prevalence and mortality rate. Since breast cancer occurs common in women but rare in men, so in this project I focus on the female patients. Among the factors in the clinic data, I choose age, pathologic stage, and vital status as factors to examine how will they affect the female patients' outcome when they develop breast cancer.
 
