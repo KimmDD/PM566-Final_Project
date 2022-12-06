@@ -41,7 +41,7 @@ opts_chunk$set(
 
 ## Introduction
 
-<p> Breast cancer becomes the second leading cause of cancer death in women, so it is necessary for us to analyze the data of breast cancer patients and to discover the pathway and mechanism of breast cancer-related genes due to the high prevalence and mortality rate. Since breast cancer occurs common in women but rare in men, so in this project I focus on the female patients. Among the factors in the clinic data, I choose age, pathologic stage, and vital status as factors to examine how will they affects the female patients' outcome when they develop breast cancer.  </p>
+<p> Breast cancer becomes the second leading cause of cancer death in women, so it is necessary for us to analyze the data of breast cancer patients and to discover the pathway and mechanism of breast cancer-related genes due to the high prevalence and mortality rate. Since breast cancer occurs common in women but rare in men, so in this project I focus on the female patients. Among the factors in the clinic data, I choose age, pathologic stage, and vital status as factors to examine how will they affect the female patients' outcome when they develop breast cancer.  </p>
 
 
 ## Database  

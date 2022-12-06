@@ -56,7 +56,7 @@ over 20,000 cancer tissue samples and matches them with normal samples spanning 
 
 ```{r message=FALSE, echo=FALSE, warning=FALSE, include=FALSE}
 # read clinic data
-clinic_1 = read_delim(file="../clinical.csv", delim = "\t")
+clinic_1 = read_delim(file="../GDCdata/clinical.csv", delim = "\t")
 
 
 # downloading clinical data

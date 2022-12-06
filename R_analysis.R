@@ -17,7 +17,7 @@ mynamestheme <- theme(
 )
 
 # read clinic data
-clinic_1 = read_delim(file="clinical.csv", delim = "\t")
+clinic_1 = read_delim(file="GDCdata/clinical.csv", delim = "\t")
 
 
 # downloading clinical data
