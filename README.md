@@ -11,5 +11,3 @@ The data I used is from TCGA (The Cancer Genome Atlas Program). It is a cancer g
 
 I did two analysis: statistical analysis to examine the structure of clinic data at "age_at_initial_pathologic_diagnosis", "ajcc_pathologic_stage", and "vital_status" columns. Also, I did survival analysis to see the survival probability between young and old female patients when they develop breast cancer at each different pathologic stage. 
 
-How to access the data:
-

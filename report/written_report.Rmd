@@ -126,8 +126,8 @@ distribution_graph_2
 # examine the relationship between age, pathologic_stage based on vital_status
 ggplot(data = clinic_age_no_NAs) + 
   geom_point(mapping = aes(x = age_at_initial_pathologic_diagnosis, y = ajcc_pathologic_stage, color = vital_status)) + labs(title = "Ages, Pathologic Stage, and Vital Status for Female Breast Cancer Patients",
-         xaxis = list(title = "age at diagnosis"), 
-         yaxis = list(title = "Pathologic Stage"))
+         x =  "age at diagnosis", 
+         y =  "Pathologic Stage")  + mynamestheme
 ```
 
 <p> Figure 3. Scatter plot for ages, pathologic stage, and vital status for female breast cancer patients. The proportion of "dead" female patients increases with stage increases. The old female patients have more patients with "dead" vital status than young female patients. </p>
